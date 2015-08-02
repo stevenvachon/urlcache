@@ -1,6 +1,6 @@
 # urlcache [![NPM Version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][david-image]][david-url]
 
-> Cache URL responses.
+> URL key-value cache and store.
 
 ## Installation
 
@@ -18,40 +18,38 @@ var UrlCache = require("urlcache");
 var cache = new UrlCache(options);
 
 cache.set("http://domain.com/#hash", "value");
-
-console.log( cache.get("http://domain.com/") );  //-> "value"
+cache.set("http://domain.com/path/to/something.html", {"key":"value"});
 ```
 
 
 ## Methods
 Note: all instances of `url` can be either a `String` or a [`url.parse()`](https://nodejs.org/api/url.html#url_url_parse_urlstr_parsequerystring_slashesdenotehost)-compatible `Object`.
 
-### .clear()
-Removes all cached key value pairs.
+### .clear([url])
+Removes `url` from cache (whether defined with `set()` or `setting()`). If `url` is not defined, *all* cached key value pairs will be removed.
 
 ### .contains(url)
-Returns `true` if `url` currently has a value stored in cache; `false` if it does not.
+Returns `true` if `url` currently has a value stored or in the process of being stored in cache; `false` if it does not.
 
-### .isSetting(url)
-Returns `true` if `url` currently has a value in the process of being stored in cache (as in, the request is likely incomplete); `false` if it does not.
-
-### .get(url)
-Retrieves a cached value at `url` key.
-
-### .getWhenSet(url, callback)
-Runs `callback` when the value of `url` has been stored in cache.
+### .get(url, callback)
+Runs `callback` when the value of `url` has been stored. If called before `set()` and/or `setting()`, the value will be `undefined`.
 ```js
-cache.getWhenSet("url", function(value) {
+cache.get("url", function(value) {
+    console.log(value);  //-> undefined
+});
+
+cache.setting("url");
+cache.get("url", function(value) {
     console.log(value);  //-> "value"
 });
 cache.set("url", "value");
 ```
 
 ### .set(url, value, expiryTime)
-Stores `value` into `url` key. Optionally, define `expiryTime` to override `options.expiryTime` as the number of milliseconds in which it should be considered valid.
+Stores `value` (any type) into `url` key. Optionally, define `expiryTime` to override `options.expiryTime`.
 
 ### .setting(url)
-Marks `url` as being in the process of storing its value in cache. For use with `isSetting()`.
+Marks `url` as being in the process of storing its value in cache. If the value of `url` has already been stored, nothing will be marked.
 
 
 ## Options
@@ -59,7 +57,7 @@ Marks `url` as being in the process of storing its value in cache. For use with 
 ### options.expiryTime
 Type: `Number`  
 Default value: `Infinity`  
-The number of milliseconds in which a cached value should be considered valid. Can be overridden per key/value with `set()`.
+The number of milliseconds in which a cached value should be considered valid.
 
 ### options.normalizeUrls
 Type: `Boolean`  
@@ -73,6 +71,7 @@ When `true`, will remove `#hashes` from URLs because they are local to the docum
 
 
 ## Changelog
+* 0.2.0 simplified API
 * 0.1.0 initial release
 
 

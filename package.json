@@ -1,7 +1,7 @@
 {
   "name": "urlcache",
-  "description": "Cache URL responses.",
-  "version": "0.1.0",
+  "description": "URL key-value cache and store.",
+  "version": "0.2.0",
   "license": "MIT",
   "homepage": "https://github.com/stevenvachon/urlcache",
   "author": {
