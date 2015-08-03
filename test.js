@@ -2,6 +2,23 @@
 var UrlCache = require("./");
 
 var expect = require("chai").expect;
+var objectAssign = require("object-assign");
+var urllib = require("url");
+
+
+
+function options(overrides)
+{
+	var testDefaults = 
+	{
+		// All others will use default values
+		// as this will ensure that when they change, tests WILL break
+		normalizeUrls: false,
+		stripUrlHashes: false
+	};
+	
+	return objectAssign({}, testDefaults, overrides);
+}
 
 
 
@@ -9,12 +26,15 @@ describe("setting()", function()
 {
 	it("should contain a url that will be set", function(done)
 	{
-		var cache = new UrlCache();
-		var url = "some url";
+		var cache = new UrlCache( options() );
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
 		
-		cache.setting(url);
+		cache.setting(url1);
+		cache.setting(url2);
 		
-		expect( cache.contains(url) ).to.be.true;
+		expect( cache.contains(url1) ).to.be.true;
+		expect( cache.contains(url2) ).to.be.true;
 		done();
 	});
 
@@ -22,11 +42,13 @@ describe("setting()", function()
 
 	it("should not contain a url that will not be set", function(done)
 	{
-		var cache = new UrlCache();
+		var cache = new UrlCache( options() );
 		
 		cache.setting("some url");
+		cache.setting( urllib.parse("another url") );
 		
-		expect( cache.contains("another url") ).to.be.false;
+		expect( cache.contains("some other url") ).to.be.false;
+		expect( cache.contains( urllib.parse("yet another url") ) ).to.be.false;
 		done();
 	});
 
@@ -34,13 +56,17 @@ describe("setting()", function()
 
 	it("should contain a url that has been set", function(done)
 	{
-		var cache = new UrlCache();
-		var url = "some url";
+		var cache = new UrlCache( options() );
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
 		
-		cache.setting(url);
-		cache.set(url, "some value");
+		cache.setting(url1);
+		cache.setting(url2);
+		cache.set(url1, "some value");
+		cache.set(url2, "another value");
 		
-		expect( cache.contains(url) ).to.be.true;
+		expect( cache.contains(url1) ).to.be.true;
+		expect( cache.contains(url2) ).to.be.true;
 		done();
 	});
 
@@ -48,13 +74,17 @@ describe("setting()", function()
 
 	it("should not contain a url that was cleared specifically", function(done)
 	{
-		var cache = new UrlCache();
-		var url = "some url";
+		var cache = new UrlCache( options() );
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
 		
-		cache.setting(url);
-		cache.clear(url);
+		cache.setting(url1);
+		cache.setting(url2);
+		cache.clear(url1);
+		cache.clear(url2);
 		
-		expect( cache.contains(url) ).to.be.false;
+		expect( cache.contains(url1) ).to.be.false;
+		expect( cache.contains(url2) ).to.be.false;
 		done();
 	});
 	
@@ -62,13 +92,16 @@ describe("setting()", function()
 	
 	it("should not contain a url that was cleared globally", function(done)
 	{
-		var cache = new UrlCache();
-		var url = "some url";
+		var cache = new UrlCache( options() );
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
 		
-		cache.setting(url);
+		cache.setting(url1);
+		cache.setting(url2);
 		cache.clear();
 		
-		expect( cache.contains(url) ).to.be.false;
+		expect( cache.contains(url1) ).to.be.false;
+		expect( cache.contains(url2) ).to.be.false;
 		done();
 	});
 });
@@ -79,12 +112,15 @@ describe("set()", function()
 {
 	it("should contain what was set", function(done)
 	{
-		var cache = new UrlCache();
-		var url = "some url";
+		var cache = new UrlCache( options() );
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
 		
-		cache.set(url, "some value");
+		cache.set(url1, "some value");
+		cache.set(url2, "another value");
 		
-		expect( cache.contains(url) ).to.be.true;
+		expect( cache.contains(url1) ).to.be.true;
+		expect( cache.contains(url2) ).to.be.true;
 		done();
 	});
 	
@@ -92,58 +128,132 @@ describe("set()", function()
 	
 	it("should get what was set", function(done)
 	{
-		var cache = new UrlCache();
-		var url = "some url";
-		var value = "some value";
+		var cache = new UrlCache( options() );
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
+		var value1 = "some value";
+		var value2 = "another value";
 		
-		cache.set(url, value);
-		cache.get(url, function(getValue)
+		cache.set(url1, value1);
+		cache.set(url2, value2);
+		cache.get(url1, function(value)
 		{
-			expect(getValue).to.equal(value);
-			done();
+			expect(value).to.equal(value1);
 		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.equal(value2);
+		});
+		
+		done();
 	});
 	
 	
 	
 	it("should overwrite a value", function(done)
 	{
-		var cache = new UrlCache();
-		var url = "some url";
-		var value = "some value";
+		var cache = new UrlCache( options() );
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
+		var value1 = "some value";
+		var value2 = "another value";
 		
-		cache.set(url, value);
-		cache.get(url, function(getValue)
+		cache.set(url1, value1);
+		cache.set(url2, value2);
+		cache.get(url1, function(value)
 		{
-			expect(getValue).to.equal(value);
+			expect(value).to.equal(value1);
+		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.equal(value2);
 		});
 		
-		value = "another value";
+		value1 = "some other value";
+		value2 = "yet another value";
 		
-		cache.set(url, value);
-		cache.get(url, function(getValue)
+		cache.set(url1, value1);
+		cache.set(url2, value2);
+		cache.get(url1, function(value)
 		{
-			expect(getValue).to.equal(value);
-			done();
+			expect(value).to.equal(value1);
 		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.equal(value2);
+		});
+		
+		done();
+	});
+	
+	
+	
+	it("should overwrite setting() but not be overwritten by it", function(done)
+	{
+		var cache = new UrlCache( options() );
+		var success1 = false;
+		var success2 = false;
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
+		var value1 = "some value";
+		var value2 = "another value";
+		
+		function callback1(value)
+		{
+			expect(value).to.equal(value1);
+			
+			success1 = true;
+		}
+		function callback2(value)
+		{
+			expect(value).to.equal(value2);
+			
+			success2 = true;
+		}
+			
+		cache.setting(url1);
+		cache.setting(url2);
+		
+		cache.set(url1, value1);
+		cache.set(url2, value2);
+		cache.get(url1, callback1);
+		cache.get(url2, callback2);
+		
+		expect(success1).to.be.true;
+		expect(success2).to.be.true;
+		
+		cache.setting(url1);
+		cache.setting(url2);
+		cache.get(url1, callback1);
+		cache.get(url2, callback2);
+		
+		done();
 	});
 
 
 
 	it("should not contain nor get a url that was cleared specifically", function(done)
 	{
-		var cache = new UrlCache();
-		var url = "some url";
+		var cache = new UrlCache( options() );
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
 		
-		cache.set(url, "some value");
-		cache.clear(url);
+		cache.set(url1, "some value");
+		cache.set(url2, "another value");
+		cache.clear(url1);
+		cache.clear(url2);
 		
-		cache.get(url, function(getValue)
+		cache.get(url1, function(value)
 		{
-			expect(getValue).to.be.undefined;
+			expect(value).to.be.undefined;
+		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.be.undefined;
 		});
 		
-		expect( cache.contains(url) ).to.be.false;
+		expect( cache.contains(url1) ).to.be.false;
+		expect( cache.contains(url2) ).to.be.false;
 		done();
 	});
 	
@@ -151,96 +261,192 @@ describe("set()", function()
 	
 	it("should not contain nor get a url that was cleared globally", function(done)
 	{
-		var cache = new UrlCache();
-		var url = "some url";
+		var cache = new UrlCache( options() );
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
 		
-		cache.set(url, "some value");
+		cache.set(url1, "some value");
+		cache.set(url2, "another value");
 		cache.clear();
 		
-		cache.get(url, function(getValue)
+		cache.get(url1, function(value)
 		{
-			expect(getValue).to.be.undefined;
+			expect(value).to.be.undefined;
+		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.be.undefined;
 		});
 		
-		expect( cache.contains(url) ).to.be.false;
+		expect( cache.contains(url1) ).to.be.false;
+		expect( cache.contains(url2) ).to.be.false;
 		done();
 	});
 	
 	
 	
-	// TODO :: exiryTime?
+	it("expiryTime should work", function(done)
+	{
+		var cache = new UrlCache( options() );
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
+		var value1 = "some value";
+		var value2 = "another value";
+		
+		cache.set(url1, value1, 50);
+		cache.set(url2, value2, 50);
+		
+		expect( cache.contains(url1) ).to.be.true;
+		expect( cache.contains(url2) ).to.be.true;
+		
+		setTimeout( function()
+		{
+			expect( cache.contains(url1) ).to.be.false;
+			expect( cache.contains(url2) ).to.be.false;
+			
+			cache.set(url1, value1, 50);
+			cache.set(url2, value2, 50);
+			cache.get(url1, function(value)
+			{
+				expect(value).to.equal(value1);
+			});
+			cache.get(url2, function(value)
+			{
+				expect(value).to.equal(value2);
+			});
+			
+			setTimeout( function()
+			{
+				cache.get(url1, function(value)
+				{
+					expect(value).to.be.undefined;
+				});
+				cache.get(url2, function(value)
+				{
+					expect(value).to.be.undefined;
+				});
+				
+				done();
+			
+			}, 100);
+		
+		}, 100);
+	});
 });
 
 
 
 describe("get()", function()
 {
-	it("should get a value when it has been set", function(done)
+	it("should not get a value if not set nor will be set", function(done)
 	{
-		var cache = new UrlCache();
-		var success = false;
-		var url = "some url";
-		var value = "some value";
+		var cache = new UrlCache( options() );
+		var success1 = false;
+		var success2 = false;
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
 		
-		cache.setting(url);
-		
-		cache.get(url, function(getValue)
+		cache.get(url1, function(value)
 		{
-			expect(getValue).to.equal(value);
+			expect(value).to.be.undefined;
 			
-			success = true;
+			success1 = true;
+		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.be.undefined;
+			
+			success2 = true;
 		});
 		
-		expect(success).to.be.false;
-		
-		cache.set(url, value);
-		
-		expect(success).to.be.true;
+		expect(success1).to.be.true;
+		expect(success2).to.be.true;
 		done();
 	});
-
-
-
-	it("should not be overwritten by setting()", function(done)
+	
+	
+	
+	it("should get a value when it has been set", function(done)
 	{
-		var cache = new UrlCache();
-		var success = false;
-		var url = "some url";
-		var value = "some value";
+		var cache = new UrlCache( options() );
+		var success1 = false;
+		var success2 = false;
+		var url1 = "some url";
+		var url2 = urllib.parse("another url");
+		var value1 = "some value";
+		var value2 = "another value";
 		
-		function callback(getValue)
+		cache.setting(url1);
+		cache.setting(url2);
+		
+		cache.get(url1, function(value)
 		{
-			expect(getValue).to.equal(value);
+			expect(value).to.equal(value1);
 			
-			success = true;
-		}
-		
-		cache.get(url, function(getValue)
-		{
-			expect(getValue).to.be.undefined;
+			success1 = true;
 		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.equal(value2);
 			
-		cache.setting(url);
+			success2 = true;
+		});
 		
-		cache.set(url, value);
-		cache.get(url, callback);
+		expect(success1).to.be.false;
+		expect(success2).to.be.false;
 		
-		expect(success).to.be.true;
+		cache.set(url1, value1);
+		cache.set(url2, value2);
 		
-		cache.setting(url);
-		cache.get(url, callback);
-		
+		expect(success1).to.be.true;
+		expect(success2).to.be.true;
 		done();
 	});
 });
 
 
 
-describe("Expirations", function()
+describe("options", function()
 {
-	it("should not contain nor get a url that has expired specifically", function(done)
+	it("expiryTime = 50", function(done)
 	{
-		var cache = new UrlCache();
+		var cache = new UrlCache( options({ expiryTime:50 }) );
+		var url = "some url";
+		var value = "some value";
+		
+		cache.set(url, value);
+		
+		expect( cache.contains(url) ).to.be.true;
+		
+		setTimeout( function()
+		{
+			expect( cache.contains(url) ).to.be.false;
+			
+			cache.set(url, value);
+			cache.get(url, function(getValue)
+			{
+				expect(getValue).to.equal(value);
+			});
+			
+			setTimeout( function()
+			{
+				cache.get(url, function(getValue)
+				{
+					expect(getValue).to.be.undefined;
+				});
+				
+				done();
+			
+			}, 100);
+		
+		}, 100);
+	});
+	
+	
+	
+	it("expiryTime = 50 (specific override)", function(done)
+	{
+		var cache = new UrlCache( options({ expiryTime:500 }) );
 		var url = "some url";
 		var value = "some value";
 		
@@ -274,41 +480,141 @@ describe("Expirations", function()
 	
 	
 	
-	it("should not contain nor get a url that has expired globally", function(done)
+	it("normalizeUrls = false", function(done)
 	{
-		var cache = new UrlCache({ expiryTime:50 });
-		var url = "some url";
-		var value = "some value";
+		var cache = new UrlCache( options() );
+		var url1 = "http://domain.com/path/../to/something/../index.html";
+		var url2 = "http://domain.com/to/index.html";
+		var value1 = "some value";
+		var value2 = "another value";
 		
-		cache.set(url, value);
+		cache.set(url1, "some value");
+		cache.set(url2, "another value");
 		
-		expect( cache.contains(url) ).to.be.true;
+		expect( cache.contains(url1) ).to.be.true;
+		expect( cache.contains(url2) ).to.be.true;
 		
-		setTimeout( function()
+		cache.get(url1, function(value)
 		{
-			expect( cache.contains(url) ).to.be.false;
-			
-			cache.set(url, value);
-			cache.get(url, function(getValue)
-			{
-				expect(getValue).to.equal(value);
-			});
-			
-			setTimeout( function()
-			{
-				cache.get(url, function(getValue)
-				{
-					expect(getValue).to.be.undefined;
-				});
-				
-				done();
-			
-			}, 100);
+			expect(value).to.equal(value1);
+		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.equal(value2);
+		});
 		
-		}, 100);
+		done();
+	});
+	
+	
+	
+	it("normalizeUrls = true", function(done)
+	{
+		var cache = new UrlCache( options({ normalizeUrls:true }) );
+		var url1 = "http://domain.com/path/../to/something/../index.html";
+		var url2 = "http://domain.com/to/index.html";
+		var value1 = "some value";
+		var value2 = "another value";
+		
+		cache.set(url1, "some value");
+		cache.set(url2, "another value");
+		
+		expect( cache.contains(url1) ).to.be.true;
+		expect( cache.contains(url2) ).to.be.true;
+		
+		cache.get(url1, function(value)
+		{
+			expect(value).to.equal(value2);
+		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.equal(value2);
+		});
+		
+		done();
+	});
+	
+	
+	
+	it("normalizeUrls = true, defaultPorts = {…}", function(done)
+	{
+		var cache = new UrlCache( options({ defaultPorts:{protocol:1234}, normalizeUrls:true }) );
+		var url1 = "protocol://domain.com:1234/path/to/";
+		var url2 = "protocol://domain.com/path/to/";
+		var value1 = "some value";
+		var value2 = "another value";
+		
+		cache.set(url1, "some value");
+		cache.set(url2, "another value");
+		
+		expect( cache.contains(url1) ).to.be.true;
+		expect( cache.contains(url2) ).to.be.true;
+		
+		cache.get(url1, function(value)
+		{
+			expect(value).to.equal(value2);
+		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.equal(value2);
+		});
+		
+		done();
+	});
+	
+	
+	
+	it("stripUrlHashes = false", function(done)
+	{
+		var cache = new UrlCache( options() );
+		var url1 = "http://domain.com/path/to/#hash";
+		var url2 = "http://domain.com/path/to/";
+		var value1 = "some value";
+		var value2 = "another value";
+		
+		cache.set(url1, "some value");
+		cache.set(url2, "another value");
+		
+		expect( cache.contains(url1) ).to.be.true;
+		expect( cache.contains(url2) ).to.be.true;
+		
+		cache.get(url1, function(value)
+		{
+			expect(value).to.equal(value1);
+		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.equal(value2);
+		});
+		
+		done();
+	});
+	
+	
+	
+	it("stripUrlHashes = true", function(done)
+	{
+		var cache = new UrlCache( options({ stripUrlHashes:true }) );
+		var url1 = "http://domain.com/path/to/#hash";
+		var url2 = "http://domain.com/path/to/";
+		var value1 = "some value";
+		var value2 = "another value";
+		
+		cache.set(url1, "some value");
+		cache.set(url2, "another value");
+		
+		expect( cache.contains(url1) ).to.be.true;
+		expect( cache.contains(url2) ).to.be.true;
+		
+		cache.get(url1, function(value)
+		{
+			expect(value).to.equal(value2);
+		});
+		cache.get(url2, function(value)
+		{
+			expect(value).to.equal(value2);
+		});
+		
+		done();
 	});
 });
-
-
-
-// TODO :: normalizeUrls, stripUrlHashes

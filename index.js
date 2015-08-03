@@ -5,7 +5,8 @@ var urlobj = require("urlobj");
 
 var defaultOptions = 
 {
-	expiryTime: Infinity, /*3600000,*/
+	defaultPorts: null,  // will use urlobj default value
+	expiryTime: Infinity,
 	normalizeUrls: true,
 	stripUrlHashes: true
 };
@@ -23,7 +24,7 @@ function UrlCache(options)
 
 UrlCache.prototype.clear = function(url)
 {
-	// If specific clear
+	// If specific key clear
 	if (url != null)
 	{
 		url = parseUrl(url, this.options);
@@ -44,7 +45,7 @@ UrlCache.prototype.clear = function(url)
 			delete this.settingStore[url];
 		}
 	}
-	// Clear all
+	// Clear all keys
 	else
 	{
 		this.cache = {};
@@ -74,12 +75,12 @@ UrlCache.prototype.get = function(url, callback)
 	
 	removeOld(url, this);
 	
-	// If value is stored
+	// If value has been set
 	if (this.cache[url] !== undefined)
 	{
 		callback( this.cache[url].value );
 	}
-	// If `setting()` was called
+	// If value will be set -- in other words, `setting()` was called
 	else if (this.settingStore[url] !== undefined)
 	{
 		if (this.callbacks[url] !== undefined)
@@ -91,7 +92,7 @@ UrlCache.prototype.get = function(url, callback)
 			this.callbacks[url] = [callback];
 		}
 	}
-	// Nothing has been set or will be set
+	// Nothing has been or will be set
 	else
 	{
 		callback();
@@ -159,7 +160,15 @@ UrlCache.prototype.setting = function(url)
 
 function parseUrl(url, options)
 {
-	url = urlobj.parse(url);
+	if (options.defaultPorts != null)
+	{
+		url = urlobj.parse(url, {defaultPorts:options.defaultPorts});
+	}
+	else
+	{
+		// Avoid overriding the default value of `defaultPorts` with null/undefined
+		url = urlobj.parse(url);
+	}
 	
 	if (options.normalizeUrls === true)
 	{

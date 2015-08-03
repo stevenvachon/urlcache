@@ -23,7 +23,7 @@ cache.set("http://domain.com/path/to/something.html", {"key":"value"});
 
 
 ## Methods
-Note: all instances of `url` can be either a `String` or a [`url.parse()`](https://nodejs.org/api/url.html#url_url_parse_urlstr_parsequerystring_slashesdenotehost)-compatible `Object`.
+**Note:** all instances of `url` can be either a `String` or a [`url.parse()`](https://nodejs.org/api/url.html#url_url_parse_urlstr_parsequerystring_slashesdenotehost)-compatible `Object`.
 
 ### .clear([url])
 Removes `url` from cache (whether defined with `set()` or `setting()`). If `url` is not defined, *all* cached key value pairs will be removed.
@@ -54,6 +54,11 @@ Marks `url` as being in the process of storing its value in cache. If the value 
 
 ## Options
 
+### options.defaultPorts
+Type: `Object`  
+Default value: see [urlobj.parse() options](https://github.com/stevenvachon/urlobj)  
+A map of protocol default ports for `options.normalizeUrls`.
+
 ### options.expiryTime
 Type: `Number`  
 Default value: `Infinity`  
@@ -71,6 +76,7 @@ When `true`, will remove `#hashes` from URLs because they are local to the docum
 
 
 ## Changelog
+* 0.3.0 added `options.defaultPorts`, more tests
 * 0.2.0 simplified API
 * 0.1.0 initial release
 
