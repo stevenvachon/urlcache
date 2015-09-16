@@ -4,21 +4,18 @@
 
 ## Installation
 
-[Node.js](http://nodejs.org/) `~0.10` is required. To install, type this at the command line:
+[Node.js](http://nodejs.org/) `>= 0.10` is required. To install, type this at the command line:
 
 ```shell
 npm install urlcache --save-dev
 ```
+**Note:** Node.js v0.10 will need a `Promise` polyfill.
 
 
-## Usage
-
+## Constructor
 ```js
 var UrlCache = require("urlcache");
 var cache = new UrlCache(options);
-
-cache.set("http://domain.com/#hash", "value");
-cache.set("http://domain.com/path/to/something.html", {"key":"value"});
 ```
 
 
@@ -26,30 +23,40 @@ cache.set("http://domain.com/path/to/something.html", {"key":"value"});
 **Note:** all instances of `url` can be either a `String` or a [`url.parse()`](https://nodejs.org/api/url.html#url_url_parse_urlstr_parsequerystring_slashesdenotehost)-compatible `Object`.
 
 ### .clear([url])
-Removes `url` from cache (whether defined with `set()` or `setting()`). If `url` is not defined, *all* cached key value pairs will be removed.
+Removes `url` from cache. If `url` is not defined, *all* cached key value pairs will be removed.
 
-### .contains(url)
-Returns `true` if `url` currently has a value stored or in the process of being stored in cache; `false` if it does not.
-
-### .get(url, callback)
-Runs `callback` when the value of `url` has been stored. If called before `set()` and/or `setting()`, the value will be `undefined`.
+### .get(url)
+Returns a `Promise` with the stored value of `url`. If no such value exists, the promise will be rejected.
 ```js
-cache.get("url", function(value) {
-    console.log(value);  //-> undefined
-});
-
-cache.setting("url");
-cache.get("url", function(value) {
+cache.get("url").then(function(value) {
     console.log(value);  //-> "value"
 });
-cache.set("url", "value");
+
+cache.get("unstored").catch(function(error) {
+    // not in cache (or value is a rejected Promise)
+});
 ```
 
-### .set(url, value, expiryTime)
+### .set(url, value[, expiryTime])
 Stores `value` (any type) into `url` key. Optionally, define `expiryTime` to override `options.expiryTime`.
+```js
+cache.set("url", {"key":"value"});
 
-### .setting(url)
-Marks `url` as being in the process of storing its value in cache. If the value of `url` has already been stored, nothing will be marked.
+cache.get("url").then(function(value) {
+    console.log(value);  //-> {"key":"value"}
+});
+
+cache.set("url", new Promise(function(resolve, reject) {
+	// set value after some delayed event
+	setTimeout(function() {
+		resolve("value");
+	}, 500);
+});
+
+cache.get("url").then(function(value) {
+    console.log(value);  //-> "value"
+});
+```
 
 
 ## Options
@@ -76,6 +83,7 @@ When `true`, will remove `#hashes` from URLs because they are local to the docum
 
 
 ## Changelog
+* 0.4.0 simpler `Promise`-based API
 * 0.3.0 added `options.defaultPorts`, more tests
 * 0.2.0 simplified API
 * 0.1.0 initial release
