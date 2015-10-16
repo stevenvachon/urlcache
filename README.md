@@ -1,4 +1,4 @@
-# urlcache [![NPM Version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][david-image]][david-url]
+# urlcache [![NPM Version][npm-image]][npm-url] [![Bower Version][bower-image]][bower-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][david-image]][david-url]
 
 > URL key-value cache and store.
 
@@ -38,7 +38,7 @@ cache.get("unstored").catch(function(error) {
 ```
 
 ### .set(url, value[, expiryTime])
-Stores `value` (any type) into `url` key. Optionally, define `expiryTime` to override `options.expiryTime`.
+Stores `value` (any type) into `url` key. Optionally, define `expiryTime` to override `options.expiryTime`. **Note:** any value passed in gets wrapped in `Promise.resolve`.
 ```js
 cache.set("url", {"key":"value"});
 
@@ -79,7 +79,7 @@ When `true`, will remove unnecessary URL parts in order to avoid duplicates in c
 ### options.stripUrlHashes
 Type: `Boolean`  
 Default Value: `true`  
-When `true`, will remove `#hashes` from URLs because they are local to the document that contains them.
+When `true`, will remove `#hashes` from URLs. They are most likely not useful to you because they are local to the document that contains them.
 
 
 ## Changelog
@@ -91,6 +91,8 @@ When `true`, will remove `#hashes` from URLs because they are local to the docum
 
 [npm-image]: https://img.shields.io/npm/v/urlcache.svg
 [npm-url]: https://npmjs.org/package/urlcache
+[bower-image]: https://img.shields.io/bower/v/urlcache.svg
+[bower-url]: https://github.com/stevenvachon/urlcache
 [travis-image]: https://img.shields.io/travis/stevenvachon/urlcache.svg
 [travis-url]: https://travis-ci.org/stevenvachon/urlcache
 [david-image]: https://img.shields.io/david/stevenvachon/urlcache.svg
