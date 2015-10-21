@@ -29,14 +29,16 @@ UrlCache.prototype.clear = function(url)
 		url = parseUrl(url, this.options);
 		url = stringifyUrl(url);
 		
-		if (this.cache[url] !== undefined)
+		if (this.values[url] !== undefined)
 		{
-			delete this.cache[url];
+			delete this.expiries[url];
+			delete this.values[url];
 		}
 	}
 	else
 	{
-		this.cache = {};
+		this.expiries = {};
+		this.values = {};
 	}
 };
 
@@ -46,14 +48,9 @@ UrlCache.prototype.get = function(url)
 {
 	url = formatUrl(url, this.options);
 	
-	removeExpired(url, this.cache);
+	removeExpired(url, this.expiries, this.values);
 	
-	if (this.cache[url] !== undefined)
-	{
-		return Promise.resolve( this.cache[url].value );
-	}
-	
-	return Promise.reject( new Error("key not found") );
+	return this.values[url];
 };
 
 
@@ -67,11 +64,8 @@ UrlCache.prototype.set = function(url, value, expiryTime)
 	
 	if (expiryTime == null) expiryTime = this.options.expiryTime;
 	
-	this.cache[url] =
-	{
-		expiryTime: Date.now() + expiryTime,
-		value: value
-	};
+	this.expiries[url] = Date.now() + expiryTime;
+	this.values[url] = value;
 };
 
 
@@ -120,13 +114,14 @@ function parseUrl(url, options)
 
 
 
-function removeExpired(url, cache)
+function removeExpired(url, expiries, values)
 {
-	if (cache[url] !== undefined)
+	if (values[url] !== undefined)
 	{
-		if ( cache[url].expiryTime < Date.now() )
+		if ( expiries[url] < Date.now() )
 		{
-			delete cache[url];
+			delete expiries[url];
+			delete values[url];
 		}
 	}
 }

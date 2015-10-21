@@ -1,7 +1,7 @@
 {
   "name": "urlcache",
   "description": "URL key-value cache and store.",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "license": "MIT",
   "homepage": "https://github.com/stevenvachon/urlcache",
   "author": {
@@ -22,10 +22,10 @@
   },
   "devDependencies": {
     "bhttp": "^1.2.1",
-    "bluebird": "^2.10.2",
     "browserify": "^11.2.0",
     "chai": "^3.3.0",
     "chai-as-promised": "^5.1.0",
+    "es6-promise": "^3.0.2",
     "mocha": "^2.3.3",
     "node-static": "~0.7.7",
     "uglify-js": "^2.5.0"

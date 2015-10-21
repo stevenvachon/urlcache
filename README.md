@@ -9,7 +9,6 @@
 ```shell
 npm install urlcache --save-dev
 ```
-**Note:** Node.js v0.10 will need a `Promise` polyfill.
 
 
 ## Constructor
@@ -26,25 +25,13 @@ var cache = new UrlCache(options);
 Removes `url` from cache. If `url` is not defined, *all* cached key value pairs will be removed.
 
 ### .get(url)
-Returns a `Promise` with the stored value of `url`. If no such value exists, the promise will be rejected.
-```js
-cache.get("url").then(function(value) {
-    console.log(value);  //-> "value"
-});
-
-cache.get("unstored").catch(function(error) {
-    // not in cache (or value is a rejected Promise)
-});
-```
+Returns the stored value of `url`. If no such value exists, `undefined` will be returned.
 
 ### .set(url, value[, expiryTime])
-Stores `value` (any type) into `url` key. Optionally, define `expiryTime` to override `options.expiryTime`. **Note:** any value passed in gets wrapped in `Promise.resolve`.
+Stores `value` (any type) into `url` key. Optionally, define `expiryTime` to override `options.expiryTime`.
 ```js
 cache.set("url", {"key":"value"});
-
-cache.get("url").then(function(value) {
-    console.log(value);  //-> {"key":"value"}
-});
+cache.get("url");  //-> {"key":"value"}
 
 cache.set("url", new Promise(function(resolve, reject) {
 	// set value after some delayed event
@@ -53,7 +40,7 @@ cache.set("url", new Promise(function(resolve, reject) {
 	}, 500);
 });
 
-cache.get("url").then(function(value) {
+Promise.resolve(cache.get("url")).then(function(value) {
     console.log(value);  //-> "value"
 });
 ```
@@ -83,6 +70,7 @@ When `true`, will remove `#hashes` from URLs. They are most likely not useful to
 
 
 ## Changelog
+* 0.5.0 removed use of Promises as they were unnecessary
 * 0.4.0 simpler `Promise`-based API
 * 0.3.0 added `options.defaultPorts`, more tests
 * 0.2.0 simplified API
