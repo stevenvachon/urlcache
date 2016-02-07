@@ -2,13 +2,13 @@
 var UrlCache = require("./");
 
 var chai = require("chai");
-var objectAssign = require("object-assign");
 var urllib = require("url");
 
 var expect = chai.expect;
 chai.use( require("chai-as-promised") );
 
 require("es6-promise").polyfill();
+require("object.assign").shim();
 
 
 
@@ -22,7 +22,7 @@ function options(overrides)
 		stripUrlHashes: false
 	};
 	
-	return objectAssign({}, testDefaults, overrides);
+	return Object.assign({}, testDefaults, overrides);
 }
 
 
@@ -158,6 +158,40 @@ describe("clear()", function()
 		
 		expect( cache.get(url1) ).to.be.undefined;
 		expect( cache.get(url2) ).to.be.undefined;
+	});
+});
+
+
+
+describe("length()", function()
+{
+	it("should work", function()
+	{
+		var cache = new UrlCache( options() );
+		
+		expect(cache.length()).to.equal(0);
+		
+		cache.clear();
+		expect(cache.length()).to.equal(0);
+		
+		cache.clear("not-available");
+		expect(cache.length()).to.equal(0);
+		
+		cache.set("some-url1", "some value1");
+		expect(cache.length()).to.equal(1);
+		
+		cache.set("some-url2", "some value2");
+		cache.set("some-url3", "some value3");
+		expect(cache.length()).to.equal(3);
+		
+		cache.clear("not-available");
+		expect(cache.length()).to.equal(3);
+		
+		cache.clear("some-url3");
+		expect(cache.length()).to.equal(2);
+		
+		cache.clear();
+		expect(cache.length()).to.equal(0);
 	});
 });
 

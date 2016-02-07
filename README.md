@@ -1,13 +1,13 @@
 # urlcache [![NPM Version][npm-image]][npm-url] [![Bower Version][bower-image]][bower-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][david-image]][david-url]
 
-> URL key-value cache and store.
+> URL key-value cache.
 
 ## Installation
 
-[Node.js](http://nodejs.org/) `>= 0.10` is required. To install, type this at the command line:
+[Node.js](http://nodejs.org/) `>= 0.10` is required; `< 4.0` will need an `Object.assign` polyfill. To install, type this at the command line:
 
 ```shell
-npm install urlcache --save-dev
+npm install urlcache
 ```
 
 
@@ -22,16 +22,19 @@ var cache = new UrlCache(options);
 **Note:** all instances of `url` can be either a `String` or a [`url.parse()`](https://nodejs.org/api/url.html#url_url_parse_urlstr_parsequerystring_slashesdenotehost)-compatible `Object`.
 
 ### .clear([url])
-Removes `url` from cache. If `url` is not defined, *all* cached key value pairs will be removed.
+Removes the `url` key-value pair. If the `url` argument is not defined, *all* pairs will be removed.
 
 ### .get(url)
 Returns the stored value of `url`. If no such value exists, `undefined` will be returned.
+
+### .length()
+Returns the number of stored key-value pairs.
 
 ### .set(url, value[, expiryTime])
 Stores `value` (any type) into `url` key. Optionally, define `expiryTime` to override `options.expiryTime`.
 ```js
 cache.set("url", {"key":"value"});
-cache.get("url");  //-> {"key":"value"}
+cache.get("url");  //=> {"key":"value"}
 
 cache.set("url", new Promise(function(resolve, reject) {
 	// set value after some delayed event
@@ -41,7 +44,7 @@ cache.set("url", new Promise(function(resolve, reject) {
 });
 
 Promise.resolve(cache.get("url")).then(function(value) {
-    console.log(value);  //-> "value"
+    console.log(value);  //=> "value"
 });
 ```
 
@@ -70,6 +73,7 @@ When `true`, will remove `#hashes` from URLs. They are most likely not useful to
 
 
 ## Changelog
+* 0.6.0 added `.length()` and removed `Object.assign()` polyfill
 * 0.5.0 removed use of Promises as they were unnecessary
 * 0.4.0 simpler `Promise`-based API
 * 0.3.0 added `options.defaultPorts`, more tests

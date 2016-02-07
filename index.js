@@ -1,5 +1,4 @@
 "use strict";
-var objectAssign = require("object-assign");
 var urllib = require("url");
 var urlobj = require("urlobj");
 
@@ -15,7 +14,7 @@ var defaultOptions =
 
 function UrlCache(options)
 {
-	this.options = objectAssign({}, defaultOptions, options);
+	this.options = Object.assign({}, defaultOptions, options);
 	
 	this.clear();
 }
@@ -33,10 +32,13 @@ UrlCache.prototype.clear = function(url)
 		{
 			delete this.expiries[url];
 			delete this.values[url];
+			
+			this.count--;
 		}
 	}
 	else
 	{
+		this.count = 0;
 		this.expiries = {};
 		this.values = {};
 	}
@@ -55,6 +57,13 @@ UrlCache.prototype.get = function(url)
 
 
 
+UrlCache.prototype.length = function()
+{
+	return this.count;
+};
+
+
+
 UrlCache.prototype.set = function(url, value, expiryTime)
 {
 	// Avoid filling cache with values that will only cause rejection
@@ -66,6 +75,8 @@ UrlCache.prototype.set = function(url, value, expiryTime)
 	
 	this.expiries[url] = Date.now() + expiryTime;
 	this.values[url] = value;
+	
+	this.count++;
 };
 
 
