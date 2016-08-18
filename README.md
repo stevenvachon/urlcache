@@ -1,11 +1,14 @@
-# urlcache [![NPM Version][npm-image]][npm-url] [![Bower Version][bower-image]][bower-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][david-image]][david-url]
+# urlcache [![NPM Version][npm-image]][npm-url] ![File Size][filesize-image] [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url] [![Dependency Monitor][greenkeeper-image]][greenkeeper-url]
 
-> URL key-value cache.
+> Normalized URL key-value cache.
+
+
+In an effort to prevent duplicates, unnecessary URL components will be (optionally) reduced/normalized.
+
 
 ## Installation
 
-[Node.js](http://nodejs.org/) `>= 0.10` is required; `< 4.0` will need an `Object.assign` polyfill. To install, type this at the command line:
-
+[Node.js](http://nodejs.org/) `>= 6` is required. To install, type this at the command line:
 ```shell
 npm install urlcache
 ```
@@ -13,80 +16,84 @@ npm install urlcache
 
 ## Constructor
 ```js
-var UrlCache = require("urlcache");
-var cache = new UrlCache(options);
+const URLCache = require('urlcache');
+const cache = new URLCache(options);
 ```
 
 
-## Methods
-**Note:** all instances of `url` can be either a `String` or a [`url.parse()`](https://nodejs.org/api/url.html#url_url_parse_urlstr_parsequerystring_slashesdenotehost)-compatible `Object`.
+## Methods & Properties
 
-### .clear([url])
-Removes the `url` key-value pair. If the `url` argument is not defined, *all* pairs will be removed.
+All occurrences of `url` *must* a [`URL`](https://developer.mozilla.org/en/docs/Web/API/URL/) instance.
 
-### .get(url)
-Returns the stored value of `url`. If no such value exists, `undefined` will be returned.
+### `.clean()`
+Removes all stored key-value pairs that have expired.
 
-### .length()
+### `.clear()`
+Removes all stored key-value pairs.
+
+### `.delete(url)`
+Removes the `url` key-value pair.
+
+### `.get(url)`
+Returns the stored value for `url`, or `undefined` if there is none.
+
+### `.has(url)`
+Returns `true` if there is a stored value for `url`.
+
+### `.length`
 Returns the number of stored key-value pairs.
 
-### .set(url, value[, expiryTime])
-Stores `value` (any type) into `url` key. Optionally, define `expiryTime` to override `options.expiryTime`.
+### `.set(url, value[, options])`
+Stores `value` (any type) associated with `url` key. Optionally, define `options` to override any defined in the constructor.
 ```js
-cache.set("url", {"key":"value"});
-cache.get("url");  //=> {"key":"value"}
+const url = new URL('http://domain/');
 
-cache.set("url", new Promise(function(resolve, reject) {
-	// set value after some delayed event
-	setTimeout(function() {
-		resolve("value");
-	}, 500);
+cache.set(url, {'key':'value'});
+cache.get(url);  //-> {'key':'value'}
+
+cache.set(url, new Promise(function(resolve, reject) {
+    // set value after some delayed event
+    setTimeout(() => resolve('value'), 500);
 });
 
-Promise.resolve(cache.get("url")).then(function(value) {
-    console.log(value);  //=> "value"
-});
+Promise.resolve(cache.get(url)).then(value =>
+    console.log(value)  //-> 'value'
+);
 ```
 
 
 ## Options
 
-### options.defaultPorts
-Type: `Object`  
-Default value: see [urlobj.parse() options](https://github.com/stevenvachon/urlobj)  
-A map of protocol default ports for `options.normalizeUrls`.
+### `carefulProfile`
+Type: `Object`
+Default value: see [minurl option profiles](https://npmjs.com/minurl#option-profiles)
+A configuration of normalizations performed on URLs to hosts that may not be configured correctly or ideally.
 
-### options.expiryTime
-Type: `Number`  
-Default value: `Infinity`  
+### `commonProfile`
+Type: `Object`
+Default value: see [minurl option profiles](https://npmjs.com/minurl#option-profiles)
+A configuration of normalizations performed on URLs to hosts that you expect to be configured correctly and ideally.
+
+### `maxAge`
+Type: `Number`
+Default value: `Infinity`
 The number of milliseconds in which a cached value should be considered valid.
 
-### options.normalizeUrls
-Type: `Boolean`  
-Default value: `true`  
-When `true`, will remove unnecessary URL parts in order to avoid duplicates in cache.
+### `profile`
+Type: `Boolean`
+Default value: `'common'`
+The URL normalization profile. For example, value of `'common'` will use `commonProfile`.
 
-### options.stripUrlHashes
-Type: `Boolean`  
-Default Value: `true`  
-When `true`, will remove `#hashes` from URLs. They are most likely not useful to you because they are local to the document that contains them.
-
-
-## Changelog
-* 0.7.0 support for Node.js v9
-* 0.6.0 added `.length()` and removed `Object.assign()` polyfill
-* 0.5.0 removed use of Promises as they were unnecessary
-* 0.4.0 simpler `Promise`-based API
-* 0.3.0 added `options.defaultPorts`, more tests
-* 0.2.0 simplified API
-* 0.1.0 initial release
+### Default Options
+`URLCache.DEFAULT_OPTIONS` is available for customizable extension.
 
 
 [npm-image]: https://img.shields.io/npm/v/urlcache.svg
 [npm-url]: https://npmjs.org/package/urlcache
-[bower-image]: https://img.shields.io/bower/v/urlcache.svg
-[bower-url]: https://github.com/stevenvachon/urlcache
+[filesize-image]: https://img.shields.io/badge/size-3kB%20gzipped-blue.svg
 [travis-image]: https://img.shields.io/travis/stevenvachon/urlcache.svg
 [travis-url]: https://travis-ci.org/stevenvachon/urlcache
-[david-image]: https://img.shields.io/david/stevenvachon/urlcache.svg
-[david-url]: https://david-dm.org/stevenvachon/urlcache
+[coveralls-image]: https://img.shields.io/coveralls/stevenvachon/urlcache.svg
+[coveralls-url]: https://coveralls.io/github/stevenvachon/urlcache
+[greenkeeper-image]: https://badges.greenkeeper.io/stevenvachon/urlcache.svg
+[greenkeeper-url]: https://greenkeeper.io/
