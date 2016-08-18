@@ -1,152 +1,133 @@
 "use strict";
-var urllib = require("url");
-var urlobj = require("urlobj");
+const deepFreeze = require("deep-freeze-node");
+const defined = require("defined");
+const minURL = require("minurl");
 
-var defaultOptions = 
+const defaultOptions =
 {
-	defaultPorts: null,  // will use urlobj default value
-	expiryTime: Infinity,
-	normalizeUrls: true,
-	stripUrlHashes: true
+	carefulProfile: Object.assign({}, minURL.CAREFUL_PROFILE, { removeHash:true }),
+	commonProfile:  Object.assign({}, minURL.COMMON_PROFILE,  { removeHash:true }),
+	maxAge: Infinity,
+	profile: "common"
 };
 
 
 
-function UrlCache(options)
+function formatURL(url, instanceOptions, customOptions={})
 {
-	this.options = Object.assign({}, defaultOptions, options);
-	
-	this.clear();
+	const profileName = `${ defined(customOptions.profile, instanceOptions.profile) }Profile`;
+	const profile = defined(customOptions[profileName], instanceOptions[profileName]);
+
+	return minURL(url, profile);
 }
 
 
 
-UrlCache.prototype.clear = function(url)
+function remove(instance, url)
 {
-	if (url != null)
+	if (url in instance.values)
 	{
-		url = parseUrl(url, this.options);
-		url = stringifyUrl(url);
-		
-		if (this.values[url] !== undefined)
-		{
-			delete this.expiries[url];
-			delete this.values[url];
-			
-			this.count--;
-		}
+		delete instance.ages[url];
+		delete instance.values[url];
+
+		instance.count--;
 	}
-	else
+}
+
+
+
+function removeExpired(instance, url)
+{
+	if (instance.ages[url] < Date.now())
 	{
+		remove(instance, url);
+	}
+}
+
+
+
+class URLCache
+{
+	constructor(options)
+	{
+		this.options = Object.assign({}, defaultOptions, options);
+
+		this.clear();
+	}
+
+
+
+	clean()
+	{
+		Object.keys(this.ages).forEach(url => removeExpired(this, url));
+	}
+
+
+
+	clear()
+	{
+		this.ages = {};
 		this.count = 0;
-		this.expiries = {};
 		this.values = {};
 	}
-};
 
 
 
-UrlCache.prototype.get = function(url)
-{
-	url = formatUrl(url, this.options);
-	
-	removeExpired(url, this.expiries, this.values);
-	
-	return this.values[url];
-};
-
-
-
-UrlCache.prototype.length = function()
-{
-	return this.count;
-};
-
-
-
-UrlCache.prototype.set = function(url, value, expiryTime)
-{
-	// Avoid filling cache with values that will only cause rejection
-	if (value === undefined) return;
-	
-	url = formatUrl(url, this.options);
-	
-	if (expiryTime == null) expiryTime = this.options.expiryTime;
-	
-	this.expiries[url] = Date.now() + expiryTime;
-	this.values[url] = value;
-	
-	this.count++;
-};
-
-
-
-//::: PRIVATE FUNCTIONS
-
-
-
-function formatUrl(url, options)
-{
-	url = parseUrl(url, options);
-	url = stringifyUrl(url);
-	
-	return url;
-}
-
-
-
-function parseUrl(url, options)
-{
-	if (options.defaultPorts != null)
+	delete(url)
 	{
-		url = urlobj.parse(url, {defaultPorts:options.defaultPorts});
+		remove(this, formatURL(url, this.options));
 	}
-	else
-	{
-		// Avoid overriding the default value of `defaultPorts` with null/undefined
-		url = urlobj.parse(url);
-	}
-	
-	if (options.normalizeUrls === true)
-	{
-		// TODO :: this mutates input
-		urlobj.normalize(url);
-	}
-	
-	if (options.stripUrlHashes===true && url.hash!=null)
-	{
-		// TODO :: this mutates input
-		url.hash = null;
-		url.href = stringifyUrl(url);
-	}
-	
-	return url;
-}
 
 
 
-function removeExpired(url, expiries, values)
-{
-	if (values[url] !== undefined)
+	get(url)
 	{
-		if ( expiries[url] < Date.now() )
-		{
-			delete expiries[url];
-			delete values[url];
-		}
+		url = formatURL(url, this.options);
+
+		removeExpired(this, url);
+
+		return this.values[url];
+	}
+
+
+
+	has(url)
+	{
+		url = formatURL(url, this.options);
+
+		removeExpired(this, url);
+
+		return url in this.values;
+	}
+
+
+
+	get length()
+	{
+		return this.count;
+	}
+
+
+
+	// TODO :: `url, headers, value, options` ... key can be a hash from url and headers
+	// see https://github.com/ForbesLindesay/http-basic/issues/24#issuecomment-293630902
+	set(url, value, options={})
+	{
+		url = formatURL(url, this.options, options);
+
+		const maxAge = defined(options.maxAge, this.options.maxAge);
+
+		this.ages[url] = Date.now() + maxAge;
+		this.values[url] = value;
+
+		this.count++;
 	}
 }
 
 
 
-function stringifyUrl(url)
-{
-	if (url!==null && typeof url==="object" && url instanceof String===false)
-	{
-		return urllib.format(url);  // TODO :: use urlobj.format() when available
-	}
-}
+URLCache.DEFAULT_OPTIONS = defaultOptions;
 
 
 
-module.exports = UrlCache;
+module.exports = deepFreeze(URLCache);
