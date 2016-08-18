@@ -1,38 +1,44 @@
 {
   "name": "urlcache",
-  "description": "URL key-value cache.",
-  "version": "0.7.0",
+  "description": "Normalized URL key-value cache.",
+  "version": "1.0.0-alpha",
   "license": "MIT",
   "author": "Steven Vachon <contact@svachon.com> (https://www.svachon.com/)",
   "repository": "stevenvachon/urlcache",
   "dependencies": {
-    "urlobj": "0.0.11"
+    "deep-freeze-node": "^1.1.3",
+    "defined": "^1.0.0",
+    "minurl": "stevenvachon/minurl"
   },
   "devDependencies": {
-    "bhttp": "^1.2.4",
-    "browserify": "^16.1.1",
-    "chai": "^3.5.0",
-    "chai-as-promised": "^5.2.0",
-    "es6-promise": "^3.3.1",
-    "mocha": "^3.5.3",
-    "object.assign": "^4.1.0",
-    "uglify-js": "^3.3.14"
+    "@babel/core": "^7.2.0",
+    "@babel/preset-env": "^7.2.0",
+    "babelify": "^10.0.0",
+    "browserify": "^16.2.3",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "coveralls": "^3.0.2",
+    "gzip-size-cli": "^3.0.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
+    "terser": "^3.11.0",
+    "universal-url": "^2.0.0"
   },
   "engines": {
-    "node": ">= 0.10"
+    "node": ">= 8"
   },
   "scripts": {
-    "browserify": "browserify index.js --standalone UrlCache | uglifyjs --compress --mangle -o index-browser.js",
-    "test": "mocha test.js --reporter spec --check-leaks --bail",
-    "test-watch": "mocha test.js --reporter spec --check-leaks --bail -w"
+    "ci": "npm run test && nyc report --reporter=text-lcov | coveralls",
+    "posttest": "nyc report --reporter=html && browserify index.js --global-transform [ babelify --presets [ @babel/env ] ] --standalone URLCache | terser --compress --mangle | gzip-size",
+    "test": "nyc --reporter=text-summary mocha test.js --check-leaks --bail"
   },
   "files": [
-    "index.js",
-    "license"
+    "index.js"
   ],
   "keywords": [
     "cache",
     "uri",
-    "url"
+    "url",
+    "whatwg"
   ]
 }
