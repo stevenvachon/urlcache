@@ -1,49 +1,43 @@
 {
   "name": "urlcache",
-  "description": "URL key-value cache.",
-  "version": "0.6.0",
+  "description": "Normalized URL key-value cache.",
+  "version": "1.0.0-alpha",
   "license": "MIT",
-  "homepage": "https://github.com/stevenvachon/urlcache",
-  "author": {
-    "name": "Steven Vachon",
-    "email": "contact@svachon.com",
-    "url": "http://www.svachon.com/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/stevenvachon/urlcache.git"
-  },
-  "bugs": {
-    "url": "https://github.com/stevenvachon/urlcache/issues"
-  },
+  "author": "Steven Vachon <contact@svachon.com> (https://www.svachon.com/)",
+  "repository": "stevenvachon/urlcache",
   "dependencies": {
-    "urlobj": "0.0.8"
+    "deep-freeze-node": "^1.1.2",
+    "defined": "^1.0.0",
+    "minurl": "stevenvachon/minurl"
   },
   "devDependencies": {
-    "bhttp": "^1.2.1",
-    "browserify": "^13.0.0",
-    "chai": "^3.5.0",
-    "chai-as-promised": "^5.2.0",
-    "es6-promise": "^3.0.2",
-    "mocha": "^2.4.5",
-    "object.assign": "^4.0.3",
-    "uglify-js": "^2.6.1"
+    "babel-preset-es2015": "^6.24.1",
+    "babelify": "^7.3.0",
+    "browserify": "^14.4.0",
+    "chai": "^4.0.2",
+    "chai-as-promised": "^7.1.1",
+    "coveralls": "^2.13.1",
+    "gzip-size-cli": "^2.0.0",
+    "mocha": "^3.4.2",
+    "nyc": "^11.0.3",
+    "uglify-js": "^3.0.23",
+    "universal-url": "^1.0.0"
   },
   "engines": {
-    "node": ">= 4"
+    "node": ">= 6"
   },
   "scripts": {
-    "browserify": "browserify index.js --standalone UrlCache | uglifyjs --compress --mangle -o index-browser.js",
-    "test": "mocha test.js --reporter spec --check-leaks --bail",
-    "test-watch": "mocha test.js --reporter spec --check-leaks --bail -w"
+    "ci": "npm run test && nyc report --reporter=text-lcov | coveralls",
+    "posttest": "nyc report --reporter=html && browserify index.js --global-transform [ babelify --presets [ es2015 ] ] --standalone URLCache | uglifyjs --compress --mangle | gzip-size",
+    "test": "nyc --reporter=text-summary mocha test.js --check-leaks --bail"
   },
   "files": [
-    "index.js",
-    "license"
+    "index.js"
   ],
   "keywords": [
     "cache",
     "uri",
-    "url"
+    "url",
+    "whatwg"
   ]
 }
