@@ -16,7 +16,7 @@
     "browserify": "^14.4.0",
     "chai": "^4.0.2",
     "chai-as-promised": "^7.1.1",
-    "coveralls": "^2.13.1",
+    "coveralls": "^3.0.0",
     "gzip-size-cli": "^2.0.0",
     "mocha": "^3.4.2",
     "nyc": "^11.0.3",
