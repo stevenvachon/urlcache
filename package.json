@@ -1,36 +1,25 @@
 {
   "name": "urlcache",
   "description": "URL key-value cache.",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "license": "MIT",
-  "homepage": "https://github.com/stevenvachon/urlcache",
-  "author": {
-    "name": "Steven Vachon",
-    "email": "contact@svachon.com",
-    "url": "http://www.svachon.com/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/stevenvachon/urlcache.git"
-  },
-  "bugs": {
-    "url": "https://github.com/stevenvachon/urlcache/issues"
-  },
+  "author": "Steven Vachon <contact@svachon.com> (https://www.svachon.com/)",
+  "repository": "stevenvachon/urlcache",
   "dependencies": {
-    "urlobj": "0.0.8"
+    "urlobj": "0.0.11"
   },
   "devDependencies": {
-    "bhttp": "^1.2.1",
-    "browserify": "^13.0.0",
+    "bhttp": "^1.2.4",
+    "browserify": "^16.1.1",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.2.0",
-    "es6-promise": "^3.0.2",
-    "mocha": "^2.4.5",
-    "object.assign": "^4.0.3",
-    "uglify-js": "^2.6.1"
+    "es6-promise": "^3.3.1",
+    "mocha": "^3.5.3",
+    "object.assign": "^4.1.0",
+    "uglify-js": "^3.3.14"
   },
   "engines": {
-    "node": ">= 4"
+    "node": ">= 0.10"
   },
   "scripts": {
     "browserify": "browserify index.js --standalone UrlCache | uglifyjs --compress --mangle -o index-browser.js",

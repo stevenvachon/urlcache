@@ -73,6 +73,7 @@ When `true`, will remove `#hashes` from URLs. They are most likely not useful to
 
 
 ## Changelog
+* 0.7.0 support for Node.js v9
 * 0.6.0 added `.length()` and removed `Object.assign()` polyfill
 * 0.5.0 removed use of Promises as they were unnecessary
 * 0.4.0 simpler `Promise`-based API
