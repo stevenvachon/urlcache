@@ -1,95 +1,46 @@
-# urlcache [![NPM Version][npm-image]][npm-url] ![File Size][filesize-image] [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url] [![Dependency Monitor][greenkeeper-image]][greenkeeper-url]
+# urlcache [![NPM Version][npm-image]][npm-url] ![Build Status][ghactions-image] [![Coverage Status][codecov-image]][codecov-url]
 
 > Normalized [`URL`](https://mdn.io/URL/) key-value cache.
 
+In an effort to prevent duplicates, unnecessary URL components will be reduced/normalized.
 
-In an effort to prevent duplicates, unnecessary URL components will be (optionally) reduced/normalized.
+## Install
 
-
-## Installation
-
-[Node.js](https://nodejs.org) `>= 14` is required. To install, type this at the command line:
 ```shell
 npm install urlcache
 ```
 
+## Usage
 
-## Constructor
 ```js
-const URLCache = require('urlcache');
-const cache = new URLCache(options);
+import URLCache from 'urlcache';
+
+const cache = new URLCache({ maxAge: 250 }); // 250ms
+
+const url = new URL('https://host/');
+
+cache.set(url, { key: 'value' });
+cache.get(url); //-> { key: 'value' }
+cache.has(url); //-> true
+cache.size; //-> 1
+
+//cache.delete(url);
+//cache.clear();
+
+cache.set(
+  url,
+  new Promise(
+    resolve => setTimeout(() => resolve('value'), 500) // 500ms
+  )
+);
+
+await cache.get(url); //-> 'value'
+await cache.get(url); //-> undefined -- it expired 250ms ago
+cache.size; //-> 0
 ```
 
-
-## Methods & Properties
-
-### `.clean()`
-Removes all stored key-value pairs that have expired.
-
-### `.clear()`
-Removes all stored key-value pairs.
-
-### `.delete(url)`
-Removes the `url` key-value pair.
-
-### `.get(url)`
-Returns the stored value for `url`, or `undefined` if there is none.
-
-### `.has(url)`
-Returns `true` if there is a stored value for `url`.
-
-### `.length`
-Returns the number of stored key-value pairs.
-
-### `.set(url, value[, options])`
-Stores `value` (any type) associated with `url` key. Optionally, define `options` to override any defined in the constructor.
-```js
-const url = new URL('http://domain/');
-
-cache.set(url, {'key':'value'});
-cache.get(url);  //-> {'key':'value'}
-
-cache.set(url, new Promise(resolve => {
-  // set value after some delayed event
-  setTimeout(() => resolve('value'), 500);
-});
-
-console.log(await cache.get(url));  //-> 'value'
-```
-
-
-## Options
-
-### `carefulProfile`
-Type: `Object`  
-Default value: see [minurl option profiles](https://npmjs.com/minurl#option-profiles)  
-A configuration of normalizations performed on URLs to hosts that may not be configured correctly or ideally.
-
-### `commonProfile`
-Type: `Object`  
-Default value: see [minurl option profiles](https://npmjs.com/minurl#option-profiles)  
-A configuration of normalizations performed on URLs to hosts that you expect to be configured correctly and ideally.
-
-### `maxAge`
-Type: `Number`  
-Default value: `Infinity`  
-The number of milliseconds in which a cached value should be considered valid.
-
-### `profile`
-Type: `String`  
-Default value: `'common'`  
-The URL normalization profile. For example, value of `'common'` will use `commonProfile`.
-
-### Default Options
-`URLCache.DEFAULT_OPTIONS` is available for customizable extension.
-
-
-[npm-image]: https://img.shields.io/npm/v/urlcache.svg
-[npm-url]: https://npmjs.org/package/urlcache
-[filesize-image]: https://img.shields.io/badge/bundle-40kB%20gzipped-blue.svg
-[travis-image]: https://img.shields.io/travis/stevenvachon/urlcache.svg
-[travis-url]: https://travis-ci.org/stevenvachon/urlcache
-[coveralls-image]: https://img.shields.io/coveralls/stevenvachon/urlcache.svg
-[coveralls-url]: https://coveralls.io/github/stevenvachon/urlcache
-[greenkeeper-image]: https://badges.greenkeeper.io/stevenvachon/urlcache.svg
-[greenkeeper-url]: https://greenkeeper.io/
+[npm-image]: https://img.shields.io/npm/v/urlcache
+[npm-url]: https://npmjs.com/urlcache
+[ghactions-image]: https://img.shields.io/github/actions/workflow/status/stevenvachon/urlcache/test.yml?branch=next
+[codecov-image]: https://img.shields.io/codecov/c/github/stevenvachon/urlcache/next
+[codecov-url]: https://app.codecov.io/github/stevenvachon/urlcache/tree/next
